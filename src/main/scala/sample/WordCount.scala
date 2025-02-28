@@ -3,11 +3,7 @@ package sample
 import org.apache.spark.sql.SparkSession
 
 object WordCount {
-  val myAccessKey = "xxxXXX"
-  val mySecretKey = "xxxXXXxxxXXX"
-  val endpoint = "192.168.6.130:19000"
-  val bucket = "bigdata"
-  val filepath = "your_path.txt"
+
 
   def main(args: Array[String]) {
 
@@ -24,12 +20,12 @@ object WordCount {
     hadoopConf.set("fs.s3a.connection.establish.timeout", "6000");
     hadoopConf.set("fs.s3a.connection.ssl.enabled", "false");
 
-    hadoopConf.set("fs.s3a.access.key", myAccessKey)
-    hadoopConf.set("fs.s3a.secret.key", mySecretKey)
-    hadoopConf.set("fs.s3a.endpoint", endpoint)
+    hadoopConf.set("fs.s3a.access.key", Constants.s3_access_key)
+    hadoopConf.set("fs.s3a.secret.key", Constants.s3_secret_key)
+    hadoopConf.set("fs.s3a.endpoint", Constants.s3_endpoint)
 
 
-    val s3data = sc.textFile("s3a://" + bucket + "/" + filepath)
+    val s3data = sc.textFile("s3a://" + Constants.s3_bucket + "/your_path.txt")
     val numDog = s3data.filter(line => line.contains("Dog")).count()
     val numCat = s3data.filter(line => line.contains("Cat")).count()
     val total = s3data.count()
