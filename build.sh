@@ -2,7 +2,19 @@
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null 2>&1 && pwd -P)
 echo "SCRIPT_DIR=${SCRIPT_DIR}"
-
+class=${class:-sample.SparkPi}
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --class|-C)
+            class="$2"
+            shift
+            ;;
+        --*)
+            echo "Illegal option $1"
+            ;;
+    esac
+    shift $(( $# > 0 ? 1 : 0 ))
+done
 
 
 local_maven_repo=$(mvn help:evaluate -Dexpression=settings.localRepository |grep -v "INFO")
@@ -26,28 +38,6 @@ echo "dep_jars=${dep_jars}"
 
 mvn clean package
 
-
-
-
-
-
-docker run \
--it \
---rm \
---network=canal \
--v ./target:/target \
--v ${local_maven_repo}:${local_maven_repo} \
--v ./conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf \
-"${spark_image}" \
-/opt/spark/bin/spark-submit \
---class sample.SparkPi \
---deploy-mode cluster \
---master "${spark_master}" \
---jars "${dep_jars}" \
-http://192.168.6.171:3000/target/spark-scala-example-1.0-SNAPSHOT.jar
-
-
-
 docker run \
 -it \
 --rm \
@@ -57,11 +47,10 @@ docker run \
 -v /data/work/club/poc/spark/conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf \
 "${spark_image}" \
 /opt/spark/bin/spark-submit \
---class sample.WordCount \
+--class "${class}" \
 --deploy-mode cluster \
 --master "${spark_master}" \
 --jars "${dep_jars}" \
 http://192.168.6.171:3000/target/spark-scala-example-1.0-SNAPSHOT.jar
-
 
 
