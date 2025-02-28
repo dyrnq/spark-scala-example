@@ -8,9 +8,9 @@ object DataProcessExample {
 
   def main(args: Array[String]) {
     // 创建一个 SparkSession
-    val sparkSession = SparkSession.builder.appName("DataProcessExample").getOrCreate()
+    val spark = SparkSession.builder.appName("DataProcessExample").getOrCreate()
 
-    val sc = sparkSession.sparkContext;
+    val sc = spark.sparkContext;
     val hadoopConf = sc.hadoopConfiguration;
     //hadoopConf.set("fs.s3n.impl", "org.apache.hadoop.fs.s3native.NativeS3FileSystem") //NativeS3FileSystem Deprecated
     hadoopConf.set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
@@ -22,9 +22,9 @@ object DataProcessExample {
     hadoopConf.set("fs.s3a.secret.key", Constants.s3_secret_key)
     hadoopConf.set("fs.s3a.endpoint", Constants.s3_endpoint)
 
-    val dataFrame1 = sparkSession.read.format("csv").option("header", "true").option("inferSchema", "true").option("dateFormat", "yyyy-MM-dd HH:mm:ss").load( "s3a://" + Constants.s3_bucket + "/100_Sales_Records.csv")
+    val dataFrame1 = spark.read.format("csv").option("header", "true").option("inferSchema", "true").option("dateFormat", "yyyy-MM-dd HH:mm:ss").load( "s3a://" + Constants.s3_bucket + "/100_Sales_Records.csv")
 
-    val dataFrame2 = sparkSession.read.format("csv").option("header", "true").option("inferSchema", "true").option("dateFormat", "yyyy-MM-dd HH:mm:ss").load("s3a://" + Constants.s3_bucket + "/1000_Sales_Records.csv")
+    val dataFrame2 = spark.read.format("csv").option("header", "true").option("inferSchema", "true").option("dateFormat", "yyyy-MM-dd HH:mm:ss").load("s3a://" + Constants.s3_bucket + "/1000_Sales_Records.csv")
     //dataFrame1.printSchema();
 
     dataFrame1.createTempView("salesRecord1")
@@ -37,7 +37,7 @@ object DataProcessExample {
 
     //Dataset<Row> dataFrame3 = null;
     //dataFrame3.createOrReplaceTempView("salesRecordJoin");
-    sparkSession.sql("select * from salesRecord2").show(10)
+    spark.sql("select * from salesRecord2").show(10)
     //sparkSession.sql("select t1.Region, t1.Country, t1.Order ID from salesRecord2 t1 join on salesRecord1 t2 where t2.Region=t1.Region").show(10);
     //dataFrame3.show();
   }
