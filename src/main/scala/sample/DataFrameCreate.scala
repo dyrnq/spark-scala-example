@@ -9,7 +9,7 @@ case class SampleSchema(id: Int, name: String, city: String)
 
 object DataFrameCreate {
 
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder.appName("DataFrameCreate").getOrCreate()
 
     val sc = spark.sparkContext;

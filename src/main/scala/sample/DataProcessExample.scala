@@ -6,7 +6,7 @@ object DataProcessExample {
 
 
 
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     // 创建一个 SparkSession
     val spark = SparkSession.builder.appName("DataProcessExample").getOrCreate()
 
