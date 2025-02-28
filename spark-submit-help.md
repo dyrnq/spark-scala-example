@@ -1,3 +1,4 @@
+```bash
 Usage: spark-submit [options] <app jar | python file | R file> [app arguments]
 Usage: spark-submit --kill [submission ID] --master [spark://...]
 Usage: spark-submit --status [submission ID] --master [spark://...]
@@ -87,3 +88,4 @@ Options:
  Spark on YARN only:
   --queue QUEUE_NAME          The YARN queue to submit to (Default: "default").
       
+```
