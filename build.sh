@@ -15,8 +15,8 @@ hadoop_ver=3.3.4
 aws_ver=1.12.367
 aws2_ver=2.30.27
 
-mvn dependency:get -Dartifact=software.amazon.awssdk:bundle:${aws2_ver}
-#mvn dependency:get -Dartifact=org.apache.hadoop:hadoop-aws:${hadoop_ver}
+#mvn dependency:get -Dartifact=software.amazon.awssdk:bundle:${aws2_ver}
+mvn dependency:get -Dartifact=org.apache.hadoop:hadoop-aws:${hadoop_ver}
 mvn dependency:get -Dartifact=com.amazonaws:aws-java-sdk-bundle:${aws_ver}
 # https://stackoverflow.com/questions/39906536/spark-history-server-on-s3a-filesystem-classnotfoundexception/65086818#65086818
 
