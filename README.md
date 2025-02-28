@@ -1,6 +1,6 @@
 # spark-scala-example
 
-This project is a proof of concept (POC) of a Spark Scala example.
+This project is a proof of concept (POC) of a Spark Scala with s3-storage(minio) without HDFS or YARN example.
 
 Pre-preparation
 
@@ -17,6 +17,14 @@ build and deploy
 build.sh -C "sample.DataProcessExample"
 build.sh -C "sample.SparkPi"
 build.sh -C "sample.WordCount"
+```
+
+
+```bash
+    [spark standalone cluster] ---------read/write----------->> [minio-cluster]                                
+                               ---------read/write----------->> [kafka-cluster] 
+                               ---------read/write----------->> [jdbc]
+                               ---------read/write----------->> [redis]
 ```
 
 ## ref
