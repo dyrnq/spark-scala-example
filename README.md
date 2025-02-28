@@ -1,13 +1,14 @@
 # spark-scala-example
 
-This project is a proof of concept (POC) of a Spark Scala with s3-storage(minio) without HDFS or YARN example.
+This project is a proof of concept (POC) for a Spark Scala application using S3 storage (Minio) without HDFS or YARN.
 
-Pre-preparation
+Preparation
 
-1. launch a spark standalone cluster.
-2. launch a minio cluster for s3 storage.
-3. create s3 access_key and secret_key
-4. create s3 bucket 
+1. Start a Spark standalone cluster.
+2. Start a Minio cluster for S3 storage.
+3. Create an S3 access key and secret key on Minio.
+4. Create an S3 bucket on Minio.
+5. Start a simple HTTP server with Python to share the target JAR files, for example: python3 -m http.server --bind 0.0.0.0 3000.
 
 build and deploy
 
