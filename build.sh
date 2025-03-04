@@ -17,7 +17,8 @@ while [ $# -gt 0 ]; do
 done
 
 
-local_maven_repo=$(mvn help:evaluate -Dexpression=settings.localRepository |grep -v "INFO")
+local_maven_repo=$(mvn help:evaluate -Dexpression=settings.localRepository |grep -v "INFO" |grep -v "WARNING")
+
 #local_maven_repo=/data/maven/repository
 echo "local_maven_repo=${local_maven_repo}"
 
@@ -30,27 +31,40 @@ aws2_ver=2.30.27
 #mvn dependency:get -Dartifact=software.amazon.awssdk:bundle:${aws2_ver}
 mvn dependency:get -Dartifact=org.apache.hadoop:hadoop-aws:${hadoop_ver}
 mvn dependency:get -Dartifact=com.amazonaws:aws-java-sdk-bundle:${aws_ver}
+mvn dependency:get -Dartifact=org.apache.kafka:kafka-clients:3.8.1
+mvn dependency:get -Dartifact=org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.4
+mvn dependency:get -Dartifact=org.apache.spark:spark-streaming-kafka-0-10_2.12:3.5.4
+mvn dependency:get -Dartifact=org.apache.spark:spark-token-provider-kafka-0-10_2.12:3.5.4
+mvn dependency:get -Dartifact=org.apache.commons:commons-pool2:2.12.1
 # https://stackoverflow.com/questions/39906536/spark-history-server-on-s3a-filesystem-classnotfoundexception/65086818#65086818
 
 
-dep_jars="${local_maven_repo}/org/apache/hadoop/hadoop-aws/${hadoop_ver}/hadoop-aws-${hadoop_ver}.jar,${local_maven_repo}/com/amazonaws/aws-java-sdk-bundle/${aws_ver}/aws-java-sdk-bundle-${aws_ver}.jar"
+
+dep_jars="${local_maven_repo}/org/apache/hadoop/hadoop-aws/${hadoop_ver}/hadoop-aws-${hadoop_ver}.jar"
+dep_jars="${dep_jars},${local_maven_repo}/com/amazonaws/aws-java-sdk-bundle/${aws_ver}/aws-java-sdk-bundle-${aws_ver}.jar"
+dep_jars="${dep_jars},${local_maven_repo}/org/apache/spark/spark-sql-kafka-0-10_2.12/3.5.4/spark-sql-kafka-0-10_2.12-3.5.4.jar"
+dep_jars="${dep_jars},${local_maven_repo}/org/apache/spark/spark-streaming-kafka-0-10_2.12/3.5.4/spark-streaming-kafka-0-10_2.12-3.5.4.jar"
+dep_jars="${dep_jars},${local_maven_repo}/org/apache/spark/spark-token-provider-kafka-0-10_2.12/3.5.4/spark-token-provider-kafka-0-10_2.12-3.5.4.jar"
+dep_jars="${dep_jars},${local_maven_repo}/org/apache/kafka/kafka-clients/3.8.1/kafka-clients-3.8.1.jar"
+dep_jars="${dep_jars},${local_maven_repo}/org/apache/commons/commons-pool2/2.12.1/commons-pool2-2.12.1.jar"
 echo "dep_jars=${dep_jars}"
 
 mvn clean package
 
+
+set -x;
 docker run \
 -it \
 --rm \
 --network=canal \
 -v ./target:/target \
--v ${local_maven_repo}:${local_maven_repo} \
+-v "${local_maven_repo}":"${local_maven_repo}" \
 -v /data/work/club/poc/spark/conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf \
 "${spark_image}" \
 /opt/spark/bin/spark-submit \
 --class "${class}" \
 --deploy-mode cluster \
 --master "${spark_master}" \
---jars "${dep_jars}" \
-http://192.168.6.171:3000/target/spark-scala-example-1.0-SNAPSHOT.jar
+http://192.168.6.171:3000/target/spark-scala-example-1.0-SNAPSHOT-shaded.jar
 
 
