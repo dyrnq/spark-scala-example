@@ -15,9 +15,9 @@ build and deploy
 `use build.sh`
 
 ```bash
-build.sh -C "sample.DataProcessExample"
-build.sh -C "sample.SparkPi"
-build.sh -C "sample.WordCount"
+./build.sh -C "sample.DataProcessExample" -D cluster
+./build.sh -C "sample.SparkPi"
+./build.sh -C "sample.WordCount"
 ```
 
 
@@ -26,6 +26,7 @@ build.sh -C "sample.WordCount"
                                ---------read/write----------->> [kafka-cluster] 
                                ---------read/write----------->> [jdbc]
                                ---------read/write----------->> [redis]
+                               ---------read/write----------->> [elasticsearch]
 ```
 
 ## ref
