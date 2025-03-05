@@ -3,10 +3,25 @@
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null 2>&1 && pwd -P)
 echo "SCRIPT_DIR=${SCRIPT_DIR}"
 class=${class:-sample.SparkPi}
+deploy_mode=${deploy_mode:-cluster}
+spark_master="spark://spark-master-1:7077,spark-master-2:7077,spark-master-3:7077"
+spark_image="apache/spark:3.5.4-scala2.12-java11-python3-ubuntu"
+hadoop_ver=3.3.4
+aws_ver=1.12.367
+aws2_ver=2.30.27
+
 while [ $# -gt 0 ]; do
     case "$1" in
         --class|-C)
             class="$2"
+            shift
+            ;;
+        --deploy-mode|-D)
+            deploy_mode="$2"
+            shift
+            ;;
+        --master)
+            spark_master="$2"
             shift
             ;;
         --*)
@@ -22,11 +37,7 @@ local_maven_repo=$(mvn help:evaluate -Dexpression=settings.localRepository |grep
 #local_maven_repo=/data/maven/repository
 echo "local_maven_repo=${local_maven_repo}"
 
-spark_image="apache/spark:3.5.4-scala2.12-java11-python3-ubuntu"
-spark_master="spark://spark-master-1:7077,spark-master-2:7077,spark-master-3:7077"
-hadoop_ver=3.3.4
-aws_ver=1.12.367
-aws2_ver=2.30.27
+
 
 #mvn dependency:get -Dartifact=software.amazon.awssdk:bundle:${aws2_ver}
 mvn dependency:get -Dartifact=org.apache.hadoop:hadoop-aws:${hadoop_ver}
@@ -58,12 +69,11 @@ docker run \
 --rm \
 --network=canal \
 -v ./target:/target \
--v "${local_maven_repo}":"${local_maven_repo}" \
 -v /data/work/club/poc/spark/conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf \
 "${spark_image}" \
 /opt/spark/bin/spark-submit \
 --class "${class}" \
---deploy-mode cluster \
+--deploy-mode "${deploy_mode}" \
 --master "${spark_master}" \
 http://192.168.6.171:3000/target/spark-scala-example-1.0-SNAPSHOT-shaded.jar
 
