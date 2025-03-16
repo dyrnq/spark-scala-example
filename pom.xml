@@ -13,6 +13,7 @@
         <scala.version>2.12.20</scala.version>
         <scala.binary.version>2.12</scala.binary.version>
         <spark.version>3.5.4</spark.version>
+        <delta.version>3.3.0</delta.version>
     </properties>
 
     <dependencies>
@@ -89,6 +90,12 @@
             <version>1.8.1</version>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>io.delta</groupId>
+            <artifactId>delta-spark_2.12</artifactId>
+            <version>${delta.version}</version>
+        </dependency>
+
 
     </dependencies>
 
