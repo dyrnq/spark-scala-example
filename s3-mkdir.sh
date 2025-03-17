@@ -20,6 +20,8 @@ echo "" | mc pipe myminio/${s3_bucket}/iceberg/_SUCCESS
 echo "" | mc pipe myminio/${s3_bucket}/spark-logs/_SUCCESS
 echo "" | mc pipe myminio/${s3_bucket}/spark-checkpoints/orders/_SUCCESS
 echo "" | mc pipe myminio/${s3_bucket}/delta/_SUCCESS
+echo "" | mc pipe myminio/${s3_bucket}/hudi/_SUCCESS
+
 
 EOF
 
