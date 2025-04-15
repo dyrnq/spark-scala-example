@@ -32,7 +32,7 @@ while [ $# -gt 0 ]; do
 done
 
 
-local_maven_repo=$(mvn help:evaluate -Dexpression=settings.localRepository |grep -v "INFO" |grep -v "WARNING")
+local_maven_repo=$(mvn help:evaluate -Dexpression=settings.localRepository |grep -v "INFO" |grep -v "WARNING" | head -n1)
 
 #local_maven_repo=/data/maven/repository
 echo "local_maven_repo=${local_maven_repo}"
@@ -47,6 +47,7 @@ mvn dependency:get -Dartifact=org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.4
 mvn dependency:get -Dartifact=org.apache.spark:spark-streaming-kafka-0-10_2.12:3.5.4
 mvn dependency:get -Dartifact=org.apache.spark:spark-token-provider-kafka-0-10_2.12:3.5.4
 mvn dependency:get -Dartifact=org.apache.commons:commons-pool2:2.12.1
+mvn dependency:get -Dartifact=org.apache.hudi:hudi-utilities-bundle_2.12:1.0.1
 # https://stackoverflow.com/questions/39906536/spark-history-server-on-s3a-filesystem-classnotfoundexception/65086818#65086818
 
 
@@ -59,7 +60,8 @@ dep_jars="${dep_jars},${local_maven_repo}/org/apache/spark/spark-token-provider-
 dep_jars="${dep_jars},${local_maven_repo}/org/apache/kafka/kafka-clients/3.8.1/kafka-clients-3.8.1.jar"
 dep_jars="${dep_jars},${local_maven_repo}/org/apache/commons/commons-pool2/2.12.1/commons-pool2-2.12.1.jar"
 echo "dep_jars=${dep_jars}"
-
+dep_jars="${local_maven_repo}/org/apache/hudi/hudi-utilities-bundle_2.12/1.0.1/hudi-utilities-bundle_2.12-1.0.1.jar"
+echo "dep_jars=${dep_jars}"
 mvn clean package
 
 
@@ -75,6 +77,10 @@ docker run \
 --class "${class}" \
 --deploy-mode "${deploy_mode}" \
 --master "${spark_master}" \
+--conf "spark.driver.extraClassPath=${dep_jars}" \
+--conf "spark.executor.extraClassPath=${dep_jars}" \
 http://192.168.6.171:3000/target/spark-scala-example-1.0-SNAPSHOT-shaded.jar
 
+#spark.driver.extraClassPath=/home/mahesh.gupta/hudi-utilities-bundle_2.12-0.14.1.jar
+#spark.executor.extraClassPath=/home/mahesh.gupta/hudi-utilities-bundle_2.12-0.14.1.jar
 

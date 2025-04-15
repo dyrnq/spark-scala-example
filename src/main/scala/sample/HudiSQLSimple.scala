@@ -16,12 +16,12 @@ object HudiSQLSimple {
       .config("spark.sql.catalog.spark_catalog","org.apache.spark.sql.hudi.catalog.HoodieCatalog")
       .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
       .config("spark.kryo.registrator", "org.apache.spark.HoodieSparkKryoRegistrar")
-      .config("spark.sql.warehouse.dir", "s3a://"+Constants.s3_bucket+"/hudi") // S3 存储路径
+//      .config("spark.sql.warehouse.dir", "s3a://"+Constants.s3_bucket+"/hudi") // S3 存储路径
       .getOrCreate()
 
     // Create hudi database
     spark.sql("""
-      CREATE DATABASE IF NOT EXISTS hudi_db  LOCATION 's3a://""" + Constants.s3_bucket + """/hudi/hudi_db';
+      CREATE DATABASE IF NOT EXISTS hudi_db LOCATION 's3a://""" + Constants.s3_bucket + """/hudi/hudi_db';
       """)
     // Create hudi table
     spark.sql("""
@@ -34,7 +34,11 @@ object HudiSQLSimple {
         city STRING
       ) USING HUDI
       PARTITIONED BY (city)
-      """)
+      LOCATION 's3a://""" + Constants.s3_bucket + """/hudi/hudi_db/hudi_table'
+      """
+      )
+
+
 
 
     spark.sql("""
