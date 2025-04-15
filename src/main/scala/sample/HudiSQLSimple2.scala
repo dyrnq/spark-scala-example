@@ -17,14 +17,16 @@ object HudiSQLSimple2 {
       .config("spark.kryo.registrator", "org.apache.spark.HoodieSparkKryoRegistrar")
       .config("spark.sql.warehouse.dir", "s3a://"+Constants.s3_bucket+"/hudi") // S3 存储路径
       .getOrCreate()
+    val database="hudi_db2"
 
     // Create hudi database
-    spark.sql("""
-      CREATE DATABASE IF NOT EXISTS hudi_db2;
+    spark.sql(s"""
+      CREATE DATABASE IF NOT EXISTS ${database};
       """)
+    spark.sql(s"USE ${database}");
     // Create hudi table
-    spark.sql("""
-      CREATE TABLE IF NOT EXISTS hudi_db2.hudi_table (
+    spark.sql(s"""
+      CREATE TABLE IF NOT EXISTS ${database}.hudi_table (
         ts BIGINT,
         uuid STRING,
         rider STRING,
@@ -37,8 +39,8 @@ object HudiSQLSimple2 {
     // Exception in thread "main" org.apache.spark.sql.AnalysisException: Can not create the managed table('spark_catalog.hudi_db2.hudi_table'). The associated location('s3a://bigdata/hudi/hudi_db2.db/hudi_table') already exists.
 
 
-    spark.sql("""
-    INSERT INTO hudi_db2.hudi_table
+    spark.sql(s"""
+    INSERT INTO ${database}.hudi_table
     VALUES
     (1695159649087,'334e26e9-8355-45cc-97c6-c31daf0df330','rider-A','driver-K',19.10,'san_francisco'),
     (1695091554788,'e96c4396-3fad-413a-a942-4cb36106d721','rider-C','driver-M',27.70 ,'san_francisco'),
@@ -51,7 +53,7 @@ object HudiSQLSimple2 {
     """)
 
     // 查询数据
-    val result = spark.sql("SELECT * FROM hudi_db2.hudi_table")
+    val result = spark.sql(s"SELECT * FROM ${database}.hudi_table")
     result.show()
 
 
