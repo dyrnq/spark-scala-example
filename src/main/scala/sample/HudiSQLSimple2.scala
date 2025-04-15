@@ -18,15 +18,18 @@ object HudiSQLSimple2 {
       .config("spark.sql.warehouse.dir", "s3a://"+Constants.s3_bucket+"/hudi") // S3 存储路径
       .getOrCreate()
     val database="hudi_db2"
+    val table="hudi_table"
 
     // Create hudi database
     spark.sql(s"""
       CREATE DATABASE IF NOT EXISTS ${database};
       """)
+    spark.sql("SHOW CATALOGS").show()
+    spark.sql("SHOW DATABASES FROM spark_catalog").show()
     spark.sql(s"USE ${database}");
     // Create hudi table
     spark.sql(s"""
-      CREATE TABLE IF NOT EXISTS ${database}.hudi_table (
+      CREATE TABLE IF NOT EXISTS ${database}.${table} (
         ts BIGINT,
         uuid STRING,
         rider STRING,
@@ -35,7 +38,8 @@ object HudiSQLSimple2 {
         city STRING
       ) USING HUDI
       PARTITIONED BY (city)
-      """)
+    LOCATION 's3a://""" + Constants.s3_bucket + s"""/hudi/${database}.db/${table}'
+    """)
     // Exception in thread "main" org.apache.spark.sql.AnalysisException: Can not create the managed table('spark_catalog.hudi_db2.hudi_table'). The associated location('s3a://bigdata/hudi/hudi_db2.db/hudi_table') already exists.
 
 
@@ -53,7 +57,7 @@ object HudiSQLSimple2 {
     """)
 
     // 查询数据
-    val result = spark.sql(s"SELECT * FROM ${database}.hudi_table")
+    val result = spark.sql(s"SELECT * FROM ${database}.${table}")
     result.show()
 
 
