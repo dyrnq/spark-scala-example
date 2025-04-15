@@ -20,8 +20,9 @@ object IcebergSimple {
       .getOrCreate()
 
     // 创建 Iceberg 库
-//    spark.sql("CREATE DATABASE IF NOT EXISTS my_catalog.my_database")
-
+    spark.sql("CREATE DATABASE IF NOT EXISTS my_catalog.my_database")
+    spark.sql("SHOW CATALOGS").show()
+    spark.sql("SHOW DATABASES FROM my_catalog").show()
     // 创建 Iceberg 表
     spark.sql(
       """
