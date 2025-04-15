@@ -1,6 +1,7 @@
 package sample
 
 import org.apache.spark.sql.{SaveMode, SparkSession}
+//import org.apache.iceberg.hadoop.HadoopCatalog
 
 object IcebergSimple {
   def main(args: Array[String]): Unit = {
@@ -9,17 +10,22 @@ object IcebergSimple {
       .appName("Iceberg S3 Example")
       .config("spark.sql.extensions", "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions")
       .config("spark.sql.catalog.my_catalog", "org.apache.iceberg.spark.SparkCatalog")
-      .config("spark.sql.catalog.my_catalog.type", "hadoop") // 或者使用 "hadoop" 作为类型
+//      .config("spark.sql.catalog.my_catalog.io-impl","org.apache.iceberg.aws.s3.S3FileIO")
+//      .config("spark.sql.catalog.my_catalog.io-impl","org.apache.iceberg.hadoop.HadoopFileIO")
+      .config("spark.sql.catalog.my_catalog.catalog-impl", "org.apache.iceberg.hadoop.HadoopCatalog")
+      // https://iceberg.apache.org/javadoc/latest/org/apache/iceberg/BaseMetastoreCatalog.html
+      //.config("spark.sql.catalog.my_catalog.catalog-impl", "org.apache.iceberg.rest.RESTCatalog")
+//      .config("spark.sql.catalog.my_catalog.type", "hadoop") // 或者使用 "hadoop" 作为类型
       .config("spark.sql.catalog.my_catalog.warehouse", "s3a://"+Constants.s3_bucket+"/iceberg") // S3 存储路径
       .getOrCreate()
 
     // 创建 Iceberg 库
-    spark.sql("CREATE DATABASE IF NOT EXISTS my_catalog.my_database")
+//    spark.sql("CREATE DATABASE IF NOT EXISTS my_catalog.my_database")
 
     // 创建 Iceberg 表
     spark.sql(
       """
-        |CREATE TABLE my_catalog.my_database.my_table (
+        |CREATE TABLE IF NOT EXISTS my_catalog.my_database.my_table (
         |  id INT,
         |  data STRING
         |) USING iceberg
