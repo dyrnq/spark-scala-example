@@ -65,11 +65,21 @@ echo "dep_jars=${dep_jars}"
 mvn clean package
 
 
+s3_access_key=$(grep spark.hadoop.fs.s3a.access.key "${SCRIPT_DIR}"/conf/spark-defaults.conf | awk -F"=" '{ print $2}')
+s3_secret_key=$(grep spark.hadoop.fs.s3a.secret.key "${SCRIPT_DIR}"/conf/spark-defaults.conf | awk -F"=" '{ print $2}')
+
+echo "s3_access_key=${s3_access_key}"
+echo "s3_secret_key=${s3_secret_key}"
+
+
 set -x;
 docker run \
 -it \
 --rm \
 --network=canal \
+-e AWS_REGION="us-east-1" \
+-e AWS_ACCESS_KEY_ID="${s3_access_key}" \
+-e AWS_SECRET_ACCESS_KEY="${s3_secret_key}" \
 -v ./target:/target \
 -v /data/work/club/poc/spark/conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf \
 "${spark_image}" \
