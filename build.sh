@@ -75,13 +75,21 @@ echo "s3_secret_key=${s3_secret_key}"
 #-e AWS_ACCESS_KEY_ID="${s3_access_key}" \
 #-e AWS_SECRET_ACCESS_KEY="${s3_secret_key}" \
 extraJavaOptions="-Daws.region=us-east-1 -Daws.accessKeyId=\"${s3_access_key}\" -Daws.secretAccessKey=\"${s3_secret_key}\""
+#--conf "spark.jars.packages=org.apache.hadoop:hadoop-aws:3.2.0,com.amazonaws:aws-java-sdk-bundle:1.11.375" \
+
+
+#--conf "spark.driver.extraClassPath=${dep_jars}" \
+#--conf "spark.executor.extraClassPath=${dep_jars}" \
+#--conf "spark.jars.packages=org.apache.hudi:hudi-utilities-bundle_2.12:1.0.1" \
+#--packages "org.apache.hudi:hudi-utilities-bundle_2.12:1.0.1" \
+
 set -x;
 docker run \
 -it \
 --rm \
 --network=canal \
 -v ./target:/target \
--v /data/work/club/poc/spark/conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf \
+-v ./conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf \
 "${spark_image}" \
 /opt/spark/bin/spark-submit \
 --class "${class}" \
