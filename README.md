@@ -15,9 +15,13 @@ build and deploy
 `use build.sh`
 
 ```bash
-./build.sh -C "sample.DataProcessExample" -D cluster
+./build.sh -C "sample.DataProcessExample" -D cluster # optional -D client
 ./build.sh -C "sample.SparkPi"
 ./build.sh -C "sample.WordCount"
+./build.sh -C "sample.HudiSimple"
+./build.sh -C "sample.IcebergSimple"
+./build.sh -C "sample.IcebergRestSimple"
+./build.sh -C "sample.DeltaSimple"
 ```
 
 
