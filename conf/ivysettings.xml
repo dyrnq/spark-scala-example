@@ -1,0 +1,26 @@
+<ivysettings>
+    <settings defaultResolver="default"/>
+
+    <!--
+    <include url="${ivy.default.settings.dir}/ivysettings-public.xml"/>
+    <include url="${ivy.default.settings.dir}/ivysettings-shared.xml"/>
+    <include url="${ivy.default.settings.dir}/ivysettings-local.xml"/>
+    <include url="${ivy.default.settings.dir}/ivysettings-main-chain.xml"/>
+    -->
+
+    <resolvers>
+        <ibiblio name="sonatype-releases" root="http://oss.sonatype.org/content/repositories/releases" m2compatible="true" />
+        <!-- you might need to tweak this from china so it works -->
+        <ibiblio name="working-chinese-mirror" root="https://maven.aliyun.com/repository/public" m2compatible="true" />
+
+        <chain name="default" returnFirst="true" checkmodified="true">
+            <!--
+            <resolver ref="local"/>
+            <resolver ref="main"/>
+            <resolver ref="sonatype-releases" />
+            -->
+            <resolver ref="working-chinese-mirror" />
+        </chain>
+    </resolvers>
+
+</ivysettings>
