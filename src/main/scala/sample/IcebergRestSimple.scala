@@ -22,9 +22,13 @@ object IcebergRestSimple {
       .config("spark.sql.catalog.rest_catalog.uri", "http://192.168.6.152:9001/iceberg/")
 //      .config("spark.sql.catalog.rest_catalog.warehouse", "s3://" + Constants.s3_bucket + "/iceberg") // S3 存储路径
       .config("spark.sql.catalog.rest_catalog.s3.endpoint", "http://192.168.6.130:19000")
-      .config("spark.executorEnv.AWS_REGION", Constants.s3_region)
-      .config("spark.executorEnv.AWS_ACCESS_KEY_ID", Constants.s3_access_key)
-      .config("spark.executorEnv.AWS_SECRET_ACCESS_KEY", Constants.s3_secret_key)
+      .config("spark.executor.extraJavaOptions", String.format("-Daws.region=%s -Daws.accessKeyId=%s -Daws.secretAccessKey=%s",
+        Constants.s3_region,
+        Constants.s3_access_key,
+        Constants.s3_secret_key))
+      //      .config("spark.executorEnv.AWS_REGION", Constants.s3_region)
+      //      .config("spark.executorEnv.AWS_ACCESS_KEY_ID", Constants.s3_access_key)
+      //      .config("spark.executorEnv.AWS_SECRET_ACCESS_KEY", Constants.s3_secret_key)
       .getOrCreate()
 
     // 25/04/26 01:48:10 INFO CatalogUtil: Loading custom FileIO implementation: org.apache.iceberg.io.ResolvingFileIO

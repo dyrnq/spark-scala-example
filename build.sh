@@ -62,7 +62,7 @@ dep_jars="${dep_jars},${local_maven_repo}/org/apache/commons/commons-pool2/2.12.
 echo "dep_jars=${dep_jars}"
 dep_jars="${local_maven_repo}/org/apache/hudi/hudi-utilities-bundle_2.12/1.0.1/hudi-utilities-bundle_2.12-1.0.1.jar"
 echo "dep_jars=${dep_jars}"
-mvn clean package
+mvn clean package -Dmaven.test.skip=true
 
 
 s3_access_key=$(grep spark.hadoop.fs.s3a.access.key "${SCRIPT_DIR}"/conf/spark-defaults.conf | awk -F"=" '{ print $2}')
@@ -71,15 +71,15 @@ s3_secret_key=$(grep spark.hadoop.fs.s3a.secret.key "${SCRIPT_DIR}"/conf/spark-d
 echo "s3_access_key=${s3_access_key}"
 echo "s3_secret_key=${s3_secret_key}"
 
-
+#-e AWS_REGION="us-east-1" \
+#-e AWS_ACCESS_KEY_ID="${s3_access_key}" \
+#-e AWS_SECRET_ACCESS_KEY="${s3_secret_key}" \
+extraJavaOptions="-Daws.region=us-east-1 -Daws.accessKeyId=\"${s3_access_key}\" -Daws.secretAccessKey=\"${s3_secret_key}\""
 set -x;
 docker run \
 -it \
 --rm \
 --network=canal \
--e AWS_REGION="us-east-1" \
--e AWS_ACCESS_KEY_ID="${s3_access_key}" \
--e AWS_SECRET_ACCESS_KEY="${s3_secret_key}" \
 -v ./target:/target \
 -v /data/work/club/poc/spark/conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf \
 "${spark_image}" \
@@ -89,6 +89,7 @@ docker run \
 --master "${spark_master}" \
 --conf "spark.driver.extraClassPath=${dep_jars}" \
 --conf "spark.executor.extraClassPath=${dep_jars}" \
+--conf "spark.driver.extraJavaOptions=${extraJavaOptions}" \
 http://192.168.6.171:3000/target/spark-scala-example-1.0-SNAPSHOT-shaded.jar
 
 #spark.driver.extraClassPath=/home/mahesh.gupta/hudi-utilities-bundle_2.12-0.14.1.jar
