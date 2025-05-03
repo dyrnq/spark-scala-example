@@ -32,7 +32,7 @@ while [ $# -gt 0 ]; do
 done
 
 
-local_maven_repo=$(mvn help:evaluate -Dexpression=settings.localRepository |grep -v "INFO" |grep -v "WARNING" | head -n1)
+local_maven_repo=$(mvn help:evaluate -Dexpression=settings.localRepository |grep -v -E "^Downloading" |grep -v "INFO" |grep -v "WARNING" | head -n1)
 
 #local_maven_repo=/data/maven/repository
 echo "local_maven_repo=${local_maven_repo}"
@@ -51,7 +51,7 @@ mvn dependency:get -Dartifact=org.apache.hudi:hudi-utilities-bundle_2.12:1.0.1
 # https://stackoverflow.com/questions/39906536/spark-history-server-on-s3a-filesystem-classnotfoundexception/65086818#65086818
 
 
-
+echo "local_maven_repo=${local_maven_repo}"
 dep_jars="${local_maven_repo}/org/apache/hadoop/hadoop-aws/${hadoop_ver}/hadoop-aws-${hadoop_ver}.jar"
 dep_jars="${dep_jars},${local_maven_repo}/com/amazonaws/aws-java-sdk-bundle/${aws_ver}/aws-java-sdk-bundle-${aws_ver}.jar"
 dep_jars="${dep_jars},${local_maven_repo}/org/apache/spark/spark-sql-kafka-0-10_2.12/3.5.4/spark-sql-kafka-0-10_2.12-3.5.4.jar"
@@ -83,21 +83,28 @@ extraJavaOptions="-Daws.region=us-east-1 -Daws.accessKeyId=\"${s3_access_key}\" 
 #--conf "spark.jars.packages=org.apache.hudi:hudi-utilities-bundle_2.12:1.0.1" \
 #--packages "org.apache.hudi:hudi-utilities-bundle_2.12:1.0.1" \
 
+
+dep_jars_final="${dep_jars},${local_maven_repo}/cn/hutool/hutool-all/5.8.37/hutool-all-5.8.37.jar"
+
 set -x;
 docker run \
 -it \
 --rm \
+--hostname spark-submit \
 --network=canal \
 -v ./target:/target \
 -v ./conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf \
+-v /data/maven/repository:/data/maven/repository \
 "${spark_image}" \
 /opt/spark/bin/spark-submit \
+--jars "${dep_jars_final}" \
 --class "${class}" \
 --deploy-mode "${deploy_mode}" \
 --master "${spark_master}" \
 --conf "spark.driver.extraClassPath=${dep_jars}" \
 --conf "spark.executor.extraClassPath=${dep_jars}" \
 --conf "spark.driver.extraJavaOptions=${extraJavaOptions}" \
+--conf "spark.executor.extraJavaOptions=${extraJavaOptions}" \
 http://192.168.6.171:3000/target/spark-scala-example-1.0-SNAPSHOT-shaded.jar
 
 #spark.driver.extraClassPath=/home/mahesh.gupta/hudi-utilities-bundle_2.12-0.14.1.jar
