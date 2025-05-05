@@ -1,10 +1,12 @@
 package sample
 
+import cn.hutool.core.io.FileUtil
 import cn.hutool.core.util.StrUtil
-import org.apache.spark.SparkFiles
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.{SparkFiles, TaskContext}
 
 import java.io.File
+import java.nio.charset.Charset
 
 object TestJarsExample {
   def main(args: Array[String]): Unit = {
@@ -16,6 +18,11 @@ object TestJarsExample {
     println("**************************** driver . =" + file.getAbsolutePath)
     file.listFiles().foreach { f =>
       println(f.getName)
+    }
+
+    if (args.length > 0) {
+      println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" + args(0));
+      println(FileUtil.readString(new File(SparkFiles.getRootDirectory() + "/spark-defaults.conf"), Charset.defaultCharset()))
     }
 
     // 打印实际生效的 classpath
@@ -43,19 +50,34 @@ object TestJarsExample {
     println(parallelism)
 
     // 创建一个 Spark RDD
-    val data = spark.sparkContext.makeRDD((1 to 3000000),100)
+    val data = spark.sparkContext.makeRDD((1 to 3000000), 100)
     println(s"Number of partitions:", data.getNumPartitions)
 
 
-    val result = data.map(x => x * x).reduce(
+    val result = data.map(x => {
+      println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ map " + StrUtil.isBlankIfStr(""))
+      x * x
+    }).reduce(
+
       (x, y) => {
-        println("##################### class print executor #########" + StrUtil.isBlankIfStr(""))
-        println("**************************** executor getRootDirectory=" + SparkFiles.getRootDirectory())
+
+        if (TaskContext.get != null) {
+          val partitionId = TaskContext.get.partitionId
+          println("$$$$$$$$$$$$$$$$$$$$$ partitionId=" + partitionId);
+        }
+        println("##################### class print reduce #########" + StrUtil.isBlankIfStr(""))
+        println("**************************** reduce getRootDirectory=" + SparkFiles.getRootDirectory())
         val file = new File(SparkFiles.getRootDirectory())
-        println("**************************** executor" + file.getAbsolutePath)
+        println("**************************** reduce" + file.getAbsolutePath)
         file.listFiles().foreach { f =>
           println(f.getName)
         }
+
+        if (args.length > 0) {
+          println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" + args(0));
+          println(FileUtil.readString(new File(SparkFiles.getRootDirectory() + "/spark-defaults.conf"), Charset.defaultCharset()))
+        }
+
         x + y
       }
 
