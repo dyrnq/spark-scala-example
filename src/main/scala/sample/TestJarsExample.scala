@@ -1,12 +1,22 @@
 package sample
 
 import cn.hutool.core.util.StrUtil
+import org.apache.spark.SparkFiles
 import org.apache.spark.sql.SparkSession
+
+import java.io.File
 
 object TestJarsExample {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder.appName("TestJarsExample").getOrCreate()
 
+    println("**************************** driver getRootDirectory=" + SparkFiles.getRootDirectory())
+
+    val file = new File(".")
+    println("**************************** driver . =" + file.getAbsolutePath)
+    file.listFiles().foreach { f =>
+      println(f.getName)
+    }
 
     // 打印实际生效的 classpath
     val classLoader = getClass.getClassLoader
@@ -40,6 +50,12 @@ object TestJarsExample {
     val result = data.map(x => x * x).reduce(
       (x, y) => {
         println("##################### class print executor #########" + StrUtil.isBlankIfStr(""))
+        println("**************************** executor getRootDirectory=" + SparkFiles.getRootDirectory())
+        val file = new File(SparkFiles.getRootDirectory())
+        println("**************************** executor" + file.getAbsolutePath)
+        file.listFiles().foreach { f =>
+          println(f.getName)
+        }
         x + y
       }
 
