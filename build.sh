@@ -31,8 +31,8 @@ while [ $# -gt 0 ]; do
     shift $(( $# > 0 ? 1 : 0 ))
 done
 
-
-local_maven_repo=$(mvn help:evaluate -Dexpression=settings.localRepository |grep -v -E "^Downloading" |grep -v "INFO" |grep -v "WARNING" | head -n1)
+mvn help:evaluate -Dartifact=org.apache.commons:commons-lang3:3.17.0 -Dexpression=settings.localRepository
+local_maven_repo=$(mvn help:evaluate -Dartifact=org.apache.commons:commons-lang3:3.17.0 -Dexpression=settings.localRepository |grep -v -E "^Downloading" |grep -v "INFO" |grep -v "WARNING" | head -n1)
 
 #local_maven_repo=/data/maven/repository
 echo "local_maven_repo=${local_maven_repo}"
@@ -98,6 +98,7 @@ docker run \
 "${spark_image}" \
 /opt/spark/bin/spark-submit \
 --jars "${dep_jars_final}" \
+--files "/opt/spark/conf/spark-defaults.conf" \
 --class "${class}" \
 --deploy-mode "${deploy_mode}" \
 --master "${spark_master}" \
