@@ -1,6 +1,6 @@
 package sample
 
-import org.apache.spark.sql.{SaveMode, SparkSession}
+import org.apache.spark.sql.SparkSession
 
 object IcebergRestMultiSupportSimple {
   def main(args: Array[String]): Unit = {
@@ -40,7 +40,13 @@ object IcebergRestMultiSupportSimple {
     spark.sql("SHOW CATALOGS").show()
     spark.sql("SHOW DATABASES FROM foo_rest_catalog").show()
     spark.sql("SHOW DATABASES FROM bar_rest_catalog").show()
-
+    spark.sql(
+      """
+        |SELECT * FROM
+        |bar_rest_catalog.bar.bar_table as bar,
+        |foo_rest_catalog.foo.foo_table as foo
+        |WHERE bar.foo_id=foo.id;
+        |""".stripMargin).show()
 
     // 停止 SparkSession
     spark.stop()
