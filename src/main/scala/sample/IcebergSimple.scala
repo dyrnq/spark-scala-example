@@ -1,6 +1,7 @@
 package sample
 
 import org.apache.spark.sql.{SaveMode, SparkSession}
+import org.apache.spark.util.{ChildFirstURLClassLoader, MutableURLClassLoader}
 //import org.apache.iceberg.hadoop.HadoopCatalog
 
 object IcebergSimple {
@@ -23,11 +24,13 @@ object IcebergSimple {
     spark.sql("CREATE DATABASE IF NOT EXISTS my_catalog.my_database")
     spark.sql("SHOW CATALOGS").show()
     spark.sql("SHOW DATABASES FROM my_catalog").show()
+
+    spark.sql("DROP TABLE IF EXISTS my_catalog.my_database.my_table")
     // 创建 Iceberg 表
     spark.sql(
       """
         |CREATE TABLE IF NOT EXISTS my_catalog.my_database.my_table (
-        |  id INT,
+        |  id BIGINT,
         |  data STRING
         |) USING iceberg
         |""".stripMargin
