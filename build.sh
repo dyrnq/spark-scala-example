@@ -87,7 +87,7 @@ dep_jars=$(echo "${dep_jars}" | sed 's/,$//') ## 删除最后一个,号
 echo "dep_jars=${dep_jars}"
 
 
-#mvn clean package -Dmaven.test.skip=true
+mvn clean package -Dmaven.test.skip=true
 
 
 s3_access_key=$(grep spark.hadoop.fs.s3a.access.key "${SCRIPT_DIR}"/conf/spark-defaults.conf | awk -F"=" '{ print $2}')
@@ -129,8 +129,6 @@ docker run \
 --master "${spark_master}" \
 --conf "spark.driver.extraClassPath=${dep_jars}" \
 --conf "spark.executor.extraClassPath=${dep_jars}" \
---conf "spark.driver.extraJavaOptions=${extraJavaOptions}" \
---conf "spark.executor.extraJavaOptions=${extraJavaOptions}" \
 http://192.168.6.171:3000/target/spark-scala-example-1.0-SNAPSHOT-shaded.jar
 
 #spark.driver.extraClassPath=/home/mahesh.gupta/hudi-utilities-bundle_2.12-0.14.1.jar
