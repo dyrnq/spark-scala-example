@@ -15,6 +15,8 @@
         <spark.version>3.5.4</spark.version>
         <delta.version>3.3.0</delta.version>
         <hudi.version>1.0.1</hudi.version>
+        <hadoop.version>3.3.4</hadoop.version>
+        <iceberg.version>1.8.1</iceberg.version>
     </properties>
 
     <dependencies>
@@ -64,7 +66,7 @@
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-aws</artifactId>
-            <version>3.3.4</version>
+            <version>${hadoop.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>
@@ -74,21 +76,21 @@
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client</artifactId>
-            <version>3.3.4</version>
+            <version>${hadoop.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.iceberg</groupId>
             <artifactId>iceberg-spark-runtime-3.5_2.12</artifactId>
-            <version>1.8.1</version>
+            <version>${iceberg.version}</version>
             <scope>runtime</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.iceberg</groupId>
             <artifactId>iceberg-aws-bundle</artifactId>
-            <version>1.8.1</version>
+            <version>${iceberg.version}</version>
         </dependency>
 
         <dependency>
@@ -101,7 +103,7 @@
         <dependency>
             <groupId>org.apache.iceberg</groupId>
             <artifactId>iceberg-core</artifactId>
-            <version>1.8.1</version>
+            <version>${iceberg.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -115,6 +117,24 @@
             <artifactId>hudi-spark3.5-bundle_2.12</artifactId>
             <version>${hudi.version}</version>
         </dependency>
+
+
+
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sql-api_2.12</artifactId>
+            <version>${spark.version}</version>
+        </dependency>
+
+
+
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-connect-client-jvm_2.12</artifactId>
+            <version>${spark.version}</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>
