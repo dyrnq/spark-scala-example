@@ -58,7 +58,7 @@ object IcebergRestSimple {
     val df = spark.createDataFrame(data).toDF("id", "data")
     df.write
       .format("iceberg")
-      .mode(SaveMode.Append)
+      .mode(SaveMode.Overwrite)
       .save("rest_catalog.testdb.my_table")
 
     // 查询数据
