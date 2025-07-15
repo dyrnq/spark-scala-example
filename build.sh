@@ -6,7 +6,19 @@ class=${class:-sample.SparkPi}
 deploy_mode=${deploy_mode:-cluster}
 #spark_master="spark://spark-master-1:7077,spark-master-2:7077,spark-master-3:7077"
 spark_master="spark://192.168.6.155:7077,192.168.6.156:7077,192.168.6.157:7077"
-spark_image="apache/spark:3.5.4-scala2.12-java11-python3-ubuntu"
+#spark_image="apache/spark:3.5.4-scala2.12-java17-python3-ubuntu"
+#spark_image="bitnami/spark:3.5.4-debian-12-r6"
+
+spark_image="apache/spark:3.5.6-scala2.12-java17-python3-ubuntu"
+spark_image="bitnami/spark:3.5.6-debian-12-r1"
+
+spark_home=""
+
+if grep -q bitnami <<< "${spark_image}" ; then
+  spark_home="/opt/bitnami/spark"
+else
+  spark_home="/opt/spark"
+fi
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -118,12 +130,12 @@ docker run \
 --rm \
 --network=host \
 -v ./target:/target \
--v ./conf/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf \
+-v ./conf/spark-defaults.conf:${spark_home}/conf/spark-defaults.conf \
 -v "${local_maven_repo}":"${local_maven_repo}" \
 "${spark_image}" \
-/opt/spark/bin/spark-submit \
+${spark_home}/bin/spark-submit \
 --jars "${dep_jars}" \
---files "/opt/spark/conf/spark-defaults.conf" \
+--files "${spark_home}/conf/spark-defaults.conf" \
 --class "${class}" \
 --deploy-mode "${deploy_mode}" \
 --master "${spark_master}" \
@@ -131,6 +143,8 @@ docker run \
 --conf "spark.executor.extraClassPath=${dep_jars}" \
 http://192.168.6.171:3000/target/spark-scala-example-1.0-SNAPSHOT-shaded.jar
 
+#--conf "spark.driver.extraJavaOptions=${extraJavaOptions}" \
+#--conf "spark.executor.extraJavaOptions=${extraJavaOptions}" \
 #spark.driver.extraClassPath=/home/mahesh.gupta/hudi-utilities-bundle_2.12-0.14.1.jar
 #spark.executor.extraClassPath=/home/mahesh.gupta/hudi-utilities-bundle_2.12-0.14.1.jar
 
