@@ -106,10 +106,10 @@ for jar in "${JARS[@]}"; do
 GROUP_ID="$(echo $jar | cut -d: -f1)"
 ARTIFACT_ID="$(echo $jar | cut -d: -f2)"
 VERSION="$(echo $jar | cut -d: -f3)"
-LOCAL_PACKAGES="${LOCAL_PACKAGES}${ARTIFACT_ID}-${VERSION}.jar,"
+LOCAL_PACKAGES="${LOCAL_PACKAGES}${ARTIFACT_ID}-${VERSION}.jar:"
 done
 
-LOCAL_PACKAGES=$(echo "${LOCAL_PACKAGES}" | sed 's/,$//') ## 删除最后一个,号
+LOCAL_PACKAGES=$(echo "${LOCAL_PACKAGES}" | sed 's/:$//') ## 删除最后一个,号
 
 
 MAVEN_PATH_PACKAGES="";
@@ -122,10 +122,10 @@ JAR_WITHPATH="${local_maven_repo}/${GROUP_ID//./\/}/${ARTIFACT_ID}/${VERSION}/${
 if [ ! -e "${JAR_WITHPATH}" ]; then
     mvn dependency:get -Dartifact=${jar} -Dmaven.repo.local=${local_maven_repo}
 fi
-MAVEN_PATH_PACKAGES="${MAVEN_PATH_PACKAGES}${JAR_WITHPATH},"
+MAVEN_PATH_PACKAGES="${MAVEN_PATH_PACKAGES}${JAR_WITHPATH}:"
 done
 
-MAVEN_PATH_PACKAGES=$(echo "${MAVEN_PATH_PACKAGES}" | sed 's/,$//') ## 删除最后一个,号
+MAVEN_PATH_PACKAGES=$(echo "${MAVEN_PATH_PACKAGES}" | sed 's/:$//') ## 删除最后一个,号
 
 
 
@@ -166,34 +166,40 @@ java_opts=$(cat <<EOF | grep -v '^\s*#' | tr '\n' ' ' | sed 's/,$//'
 #-Daws.region=us-east-1
 #-Daws.accessKeyId="${s3_access_key}"
 #-Daws.secretAccessKey="${s3_secret_key}"
-#--add-exports=java.base/sun.net.util=ALL-UNNAMED
-#--add-exports=java.rmi/sun.rmi.registry=ALL-UNNAMED
-#--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED
-#--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED
-#--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED
-#--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED
-#--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED
-#--add-exports=java.security.jgss/sun.security.krb5=ALL-UNNAMED
+#--add-exports java.base/sun.net.util=ALL-UNNAMED
+#--add-exports java.rmi/sun.rmi.registry=ALL-UNNAMED
+#--add-exports jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED
+#--add-exports jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED
+#--add-exports jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED
+#--add-exports jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED
+#--add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED
+#--add-exports java.security.jgss/sun.security.krb5=ALL-UNNAMED
+-Djava.net.preferIPv6Addresses=false
 -XX:+IgnoreUnrecognizedVMOptions
---add-opens=java.base/java.lang=ALL-UNNAMED
---add-opens=java.base/java.net=ALL-UNNAMED
---add-opens=java.base/java.io=ALL-UNNAMED
---add-opens=java.base/java.nio=ALL-UNNAMED
---add-opens=java.base/sun.nio.ch=ALL-UNNAMED
---add-opens=java.base/java.lang.reflect=ALL-UNNAMED
---add-opens=java.base/java.text=ALL-UNNAMED
---add-opens=java.base/java.time=ALL-UNNAMED
---add-opens=java.base/java.util=ALL-UNNAMED
---add-opens=java.base/java.util.concurrent=ALL-UNNAMED
---add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED
---add-opens=java.base/java.util.concurrent.locks=ALL-UNNAMED
---add-opens=java.base/java.lang=ALL-UNNAMED
---add-opens=java.base/java.lang.invoke=ALL-UNNAMED
---add-opens=java.base/java.math=ALL-UNNAMED
---add-opens=java.base/java.security=ALL-UNNAMED
---add-opens=java.base/jdk.internal.access=ALL-UNNAMED
---add-opens=java.base/jdk.internal.misc=ALL-UNNAMED
---add-opens=java.base/sun.net.util=ALL-UNNAMED
+-Djdk.reflect.useDirectMethodHandle=false
+--add-opens java.base/java.lang=ALL-UNNAMED
+--add-opens java.base/java.lang.invoke=ALL-UNNAMED
+--add-opens java.base/java.lang.reflect=ALL-UNNAMED
+--add-opens java.base/java.io=ALL-UNNAMED
+--add-opens java.base/java.net=ALL-UNNAMED
+--add-opens java.base/java.nio=ALL-UNNAMED
+--add-opens java.base/java.util=ALL-UNNAMED
+--add-opens java.base/java.util.concurrent=ALL-UNNAMED
+--add-opens java.base/java.util.concurrent.atomic=ALL-UNNAMED
+--add-opens java.base/jdk.internal.ref=ALL-UNNAMED
+--add-opens java.base/sun.nio.ch=ALL-UNNAMED
+--add-opens java.base/sun.nio.cs=ALL-UNNAMED
+--add-opens java.base/sun.security.action=ALL-UNNAMED
+--add-opens java.base/sun.util.calendar=ALL-UNNAMED
+--add-opens java.security.jgss/sun.security.krb5=ALL-UNNAMED
+--add-opens java.base/java.text=ALL-UNNAMED
+--add-opens java.base/java.time=ALL-UNNAMED
+--add-opens java.base/java.util.concurrent.locks=ALL-UNNAMED
+--add-opens java.base/java.math=ALL-UNNAMED
+--add-opens java.base/java.security=ALL-UNNAMED
+--add-opens java.base/jdk.internal.access=ALL-UNNAMED
+--add-opens java.base/jdk.internal.misc=ALL-UNNAMED
+--add-opens java.base/sun.net.util=ALL-UNNAMED
 EOF
 )
 
@@ -230,6 +236,8 @@ ${dynamic_conf} \
 http://192.168.6.171:3000/target/spark-scala-example-1.0-SNAPSHOT-shaded.jar
 
 #--conf "spark.jars.packages=${PACKAGES}" \
+#--conf "spark.driver.extraClassPath=${LOCAL_PACKAGES}" \
+#--conf "spark.executor.extraClassPath=${LOCAL_PACKAGES}" \
 
 # --jars "${MAVEN_PATH_PACKAGES}" \
 # --packages "${PACKAGES}" \
