@@ -9,10 +9,13 @@ spark_master="spark://192.168.6.155:7077,192.168.6.156:7077,192.168.6.157:7077"
 #spark_image="apache/spark:3.5.4-scala2.12-java17-python3-ubuntu"
 #spark_image="bitnami/spark:3.5.4-debian-12-r6"
 
-spark_image="apache/spark:3.5.6-scala2.12-java17-python3-ubuntu"
+#spark_image="apache/spark:3.5.6-scala2.12-java17-python3-ubuntu"
 spark_image="bitnami/spark:3.5.6-debian-12-r1"
-
 spark_home=""
+
+shuffle_celeborn="false"
+celeborn_master="192.168.6.155:9097,192.168.6.156:9097,192.168.6.157:9097"
+
 
 if grep -q bitnami <<< "${spark_image}" ; then
   spark_home="/opt/bitnami/spark"
@@ -34,6 +37,14 @@ while [ $# -gt 0 ]; do
             spark_master="$2"
             shift
             ;;
+        --celeborn-shuffle|-CS)
+            shuffle_celeborn="$2"
+            shift
+            ;;
+        --celeborn-master)
+            celeborn_master="$2"
+            shift
+            ;;
         --*)
             echo "Illegal option $1"
             ;;
@@ -47,22 +58,11 @@ done
 #}
 # https://stackoverflow.com/questions/5916157/how-to-get-the-maven-local-repo-location/5916233
 
-dep_jar(){
-local maven_repo_path=$1;
-local artifact=$2;
-#set -x
-#mvn dependency:get -Dartifact=${artifact}
-#set +x
 
-group_id="$(echo $artifact | cut -d: -f1)"
-artifact_id="$(echo $artifact | cut -d: -f2)"
-version="$(echo $artifact | cut -d: -f3)"
-
-echo "${maven_repo_path}/${group_id//./\/}/${artifact_id}/${version}/${artifact_id}-${version}.jar,"
-}
 
 
 local_maven_repo=$(mvn help:evaluate -Dexpression=settings.localRepository -q -DforceStdout)
+local_maven_repo="/opt/maven-repo"
 # local_maven_repo=$(mvn help:evaluate -Dartifact=org.apache.commons:commons-lang3:3.17.0 -Dexpression=settings.localRepository |grep -v -E "^Downloading" |grep -v "INFO" |grep -v "WARNING" | head -n1)
 
 # local_maven_repo=/data/maven/repository
@@ -80,26 +80,56 @@ echo "local_maven_repo=${local_maven_repo}"
 #mvn dependency:get -Dartifact=org.apache.commons:commons-pool2:2.12.1
 #mvn dependency:get -Dartifact=org.apache.hudi:hudi-utilities-bundle_2.12:1.0.1
 #mvn dependency:get -Dartifact=org.apache.spark:spark-connect_2.12:3.5.4
+#mvn dependency:get -Dartifact=org.apache.celeborn:celeborn-client-spark-3-shaded_2.12:0.6.0
 # https://stackoverflow.com/questions/39906536/spark-history-server-on-s3a-filesystem-classnotfoundexception/65086818#65086818
 
-dep_jars="";
-dep_jars="${dep_jars}$(dep_jar $local_maven_repo org.apache.hadoop:hadoop-aws:3.3.4)"
-dep_jars="${dep_jars}$(dep_jar $local_maven_repo com.amazonaws:aws-java-sdk-bundle:1.12.367)"
-dep_jars="${dep_jars}$(dep_jar $local_maven_repo org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.4)"
-dep_jars="${dep_jars}$(dep_jar $local_maven_repo org.apache.spark:spark-streaming-kafka-0-10_2.12:3.5.4)"
-dep_jars="${dep_jars}$(dep_jar $local_maven_repo org.apache.spark:spark-token-provider-kafka-0-10_2.12:3.5.4)"
-dep_jars="${dep_jars}$(dep_jar $local_maven_repo org.apache.kafka:kafka-clients:3.8.1)"
-dep_jars="${dep_jars}$(dep_jar $local_maven_repo org.apache.commons:commons-pool2:2.12.1)"
-dep_jars="${dep_jars}$(dep_jar $local_maven_repo org.apache.hudi:hudi-utilities-bundle_2.12:1.0.1)"
+PACKAGES=$(cat <<EOF | tr '\n' ',' | sed 's/,$//'
+org.apache.hadoop:hadoop-aws:3.3.4
+com.amazonaws:aws-java-sdk-bundle:1.12.367
+org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.4
+org.apache.spark:spark-streaming-kafka-0-10_2.12:3.5.4
+org.apache.spark:spark-token-provider-kafka-0-10_2.12:3.5.4
+org.apache.kafka:kafka-clients:3.8.1
+org.apache.commons:commons-pool2:2.12.1
+org.apache.hudi:hudi-spark3.5-bundle_2.12:1.0.1
+org.apache.hudi:hudi-utilities-bundle_2.12:1.0.1
+cn.hutool:hutool-all:5.8.39
+org.apache.celeborn:celeborn-client-spark-3-shaded_2.12:0.6.0
+EOF
+)
 
-dep_jars=$(echo "${dep_jars}" | sed 's/,$//') ## 删除最后一个,号
+
+
+LOCAL_PACKAGES="";
+IFS=',' read -ra JARS <<< "$PACKAGES"
+for jar in "${JARS[@]}"; do
+GROUP_ID="$(echo $jar | cut -d: -f1)"
+ARTIFACT_ID="$(echo $jar | cut -d: -f2)"
+VERSION="$(echo $jar | cut -d: -f3)"
+LOCAL_PACKAGES="${LOCAL_PACKAGES}${ARTIFACT_ID}-${VERSION}.jar,"
+done
+
+LOCAL_PACKAGES=$(echo "${LOCAL_PACKAGES}" | sed 's/,$//') ## 删除最后一个,号
+
+
+MAVEN_PATH_PACKAGES="";
+IFS=',' read -ra JARS <<< "$PACKAGES"
+for jar in "${JARS[@]}"; do
+GROUP_ID="$(echo $jar | cut -d: -f1)"
+ARTIFACT_ID="$(echo $jar | cut -d: -f2)"
+VERSION="$(echo $jar | cut -d: -f3)"
+JAR_WITHPATH="${local_maven_repo}/${GROUP_ID//./\/}/${ARTIFACT_ID}/${VERSION}/${ARTIFACT_ID}-${VERSION}.jar"
+if [ ! -e "${JAR_WITHPATH}" ]; then
+    mvn dependency:get -Dartifact=${jar} -Dmaven.repo.local=${local_maven_repo}
+fi
+MAVEN_PATH_PACKAGES="${MAVEN_PATH_PACKAGES}${JAR_WITHPATH},"
+done
+
+MAVEN_PATH_PACKAGES=$(echo "${MAVEN_PATH_PACKAGES}" | sed 's/,$//') ## 删除最后一个,号
 
 
 
-echo "dep_jars=${dep_jars}"
-
-
-mvn clean package -Dmaven.test.skip=true
+#mvn clean package -Dmaven.test.skip=true --threads 2C
 
 
 s3_access_key=$(grep spark.hadoop.fs.s3a.access.key "${SCRIPT_DIR}"/conf/spark-defaults.conf | awk -F"=" '{ print $2}')
@@ -111,18 +141,67 @@ echo "s3_secret_key=${s3_secret_key}"
 #-e AWS_REGION="us-east-1" \
 #-e AWS_ACCESS_KEY_ID="${s3_access_key}" \
 #-e AWS_SECRET_ACCESS_KEY="${s3_secret_key}" \
-extraJavaOptions="-Daws.region=us-east-1 -Daws.accessKeyId=\"${s3_access_key}\" -Daws.secretAccessKey=\"${s3_secret_key}\""
-#--conf "spark.jars.packages=org.apache.hadoop:hadoop-aws:3.2.0,com.amazonaws:aws-java-sdk-bundle:1.11.375" \
-
-
-#--conf "spark.driver.extraClassPath=${dep_jars}" \
-#--conf "spark.executor.extraClassPath=${dep_jars}" \
-#--conf "spark.jars.packages=org.apache.hudi:hudi-utilities-bundle_2.12:1.0.1" \
-#--packages "org.apache.hudi:hudi-utilities-bundle_2.12:1.0.1" \
+# -Daws.region=us-east-1 -Daws.accessKeyId="${s3_access_key}" -Daws.secretAccessKey="${s3_secret_key}"
 
 
 
 
+
+
+
+
+dynamic_conf=""
+if [ "${shuffle_celeborn}" = "true" ]; then
+
+dynamic_conf=$(cat <<EOF | tr '\n' ' ' | sed 's/,$//'
+--conf "spark.shuffle.manager=org.apache.spark.shuffle.celeborn.SparkShuffleManager"
+--conf "spark.shuffle.service.enabled=false"
+--conf "spark.celeborn.master.endpoints=${celeborn_master}"
+EOF
+)
+
+fi
+
+java_opts=$(cat <<EOF | grep -v '^\s*#' | tr '\n' ' ' | sed 's/,$//'
+#-Daws.region=us-east-1
+#-Daws.accessKeyId="${s3_access_key}"
+#-Daws.secretAccessKey="${s3_secret_key}"
+#--add-exports=java.base/sun.net.util=ALL-UNNAMED
+#--add-exports=java.rmi/sun.rmi.registry=ALL-UNNAMED
+#--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED
+#--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED
+#--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED
+#--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED
+#--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED
+#--add-exports=java.security.jgss/sun.security.krb5=ALL-UNNAMED
+-XX:+IgnoreUnrecognizedVMOptions
+--add-opens=java.base/java.lang=ALL-UNNAMED
+--add-opens=java.base/java.net=ALL-UNNAMED
+--add-opens=java.base/java.io=ALL-UNNAMED
+--add-opens=java.base/java.nio=ALL-UNNAMED
+--add-opens=java.base/sun.nio.ch=ALL-UNNAMED
+--add-opens=java.base/java.lang.reflect=ALL-UNNAMED
+--add-opens=java.base/java.text=ALL-UNNAMED
+--add-opens=java.base/java.time=ALL-UNNAMED
+--add-opens=java.base/java.util=ALL-UNNAMED
+--add-opens=java.base/java.util.concurrent=ALL-UNNAMED
+--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED
+--add-opens=java.base/java.util.concurrent.locks=ALL-UNNAMED
+--add-opens=java.base/java.lang=ALL-UNNAMED
+--add-opens=java.base/java.lang.invoke=ALL-UNNAMED
+--add-opens=java.base/java.math=ALL-UNNAMED
+--add-opens=java.base/java.security=ALL-UNNAMED
+--add-opens=java.base/jdk.internal.access=ALL-UNNAMED
+--add-opens=java.base/jdk.internal.misc=ALL-UNNAMED
+--add-opens=java.base/sun.net.util=ALL-UNNAMED
+EOF
+)
+
+echo "${dynamic_conf}"
+echo "${java_opts}"
+echo "${MAVEN_PATH_PACKAGES}"
+echo "${LOCAL_PACKAGES}"
+#--conf "spark.jars.ivySettings=${spark_home}/conf/ivysettings.xml" \
 
 set -x;
 docker run \
@@ -131,18 +210,29 @@ docker run \
 --network=host \
 -v ./target:/target \
 -v ./conf/spark-defaults.conf:${spark_home}/conf/spark-defaults.conf \
+-v ./conf/ivysettings.xml:${spark_home}/conf/ivysettings.xml \
 -v "${local_maven_repo}":"${local_maven_repo}" \
 "${spark_image}" \
 ${spark_home}/bin/spark-submit \
---jars "${dep_jars}" \
+--packages "${PACKAGES}" \
 --files "${spark_home}/conf/spark-defaults.conf" \
 --class "${class}" \
 --deploy-mode "${deploy_mode}" \
 --master "${spark_master}" \
---conf "spark.driver.extraClassPath=${dep_jars}" \
---conf "spark.executor.extraClassPath=${dep_jars}" \
+--conf "spark.jars.ivy=${spark_home}/.ivy" \
+--conf "spark.jars.ivySettings=${spark_home}/conf/ivysettings.xml" \
+--conf "spark.driver.extraJavaOptions=${java_opts}" \
+--conf "spark.executor.extraJavaOptions=${java_opts}" \
+--conf "spark.cores.max=4" \
+--conf "spark.driver.extraClassPath=${MAVEN_PATH_PACKAGES}" \
+--conf "spark.executor.extraClassPath=${MAVEN_PATH_PACKAGES}" \
+${dynamic_conf} \
 http://192.168.6.171:3000/target/spark-scala-example-1.0-SNAPSHOT-shaded.jar
 
+#--conf "spark.jars.packages=${PACKAGES}" \
+
+# --jars "${MAVEN_PATH_PACKAGES}" \
+# --packages "${PACKAGES}" \
 #--conf "spark.driver.extraJavaOptions=${extraJavaOptions}" \
 #--conf "spark.executor.extraJavaOptions=${extraJavaOptions}" \
 #spark.driver.extraClassPath=/home/mahesh.gupta/hudi-utilities-bundle_2.12-0.14.1.jar
