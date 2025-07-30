@@ -145,6 +145,17 @@ echo "s3_secret_key=${s3_secret_key}"
 
 
 
+IVY_PACKAGES="";
+IFS=',' read -ra JARS <<< "$PACKAGES"
+for jar in "${JARS[@]}"; do
+GROUP_ID="$(echo $jar | cut -d: -f1)"
+ARTIFACT_ID="$(echo $jar | cut -d: -f2)"
+VERSION="$(echo $jar | cut -d: -f3)"
+IVY_PACKAGES="${IVY_PACKAGES}${spark_home}/.ivy/jars/${GROUP_ID}_${ARTIFACT_ID}-${VERSION}.jar:"
+done
+
+IVY_PACKAGES=$(echo "${IVY_PACKAGES}" | sed 's/:$//') ## 删除最后一个,号
+
 
 
 
@@ -227,10 +238,10 @@ ${spark_home}/bin/spark-submit \
 --master "${spark_master}" \
 --conf spark.jars.ivy=${spark_home}/.ivy \
 --conf spark.jars.ivySettings=${spark_home}/conf/ivysettings.xml \
---conf spark.driver.extraJavaOptions=${java_opts} \
---conf spark.executor.extraJavaOptions=${java_opts} \
---conf spark.driver.extraClassPath=${MAVEN_PATH_PACKAGES} \
---conf spark.executor.extraClassPath=${MAVEN_PATH_PACKAGES} \
+--conf spark.driver.extraJavaOptions="${java_opts}" \
+--conf spark.executor.extraJavaOptions="${java_opts}" \
+--conf spark.driver.extraClassPath="${IVY_PACKAGES}" \
+--conf spark.executor.extraClassPath="${IVY_PACKAGES}" \
 ${dynamic_conf} \
 http://192.168.6.171:3000/target/spark-scala-example-1.0-SNAPSHOT-shaded.jar
 
