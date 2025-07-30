@@ -95,6 +95,7 @@ org.apache.hudi:hudi-spark3.5-bundle_2.12:1.0.1
 org.apache.hudi:hudi-utilities-bundle_2.12:1.0.1
 cn.hutool:hutool-all:5.8.39
 org.apache.celeborn:celeborn-client-spark-3-shaded_2.12:0.6.0
+com.google.code.gson:gson:2.13.1
 EOF
 )
 

@@ -2,6 +2,7 @@ package sample
 
 import cn.hutool.core.io.FileUtil
 import cn.hutool.core.util.StrUtil
+import com.google.gson.{Gson, GsonBuilder}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkFiles, TaskContext}
 
@@ -88,7 +89,10 @@ object TestJarsExample {
       }
 
     )
-
+    val arr3 = Array.fill(5)(0)  // [0,0,0,0,0]
+    val arr4 = Array.tabulate(5)(i => i * 2)  // [0,2,4,6,8]
+    val gson = new GsonBuilder().setPrettyPrinting().create()
+    println(gson.toJson(arr4))
 
     spark.stop()
 
