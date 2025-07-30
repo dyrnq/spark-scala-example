@@ -24,19 +24,25 @@ object TestJarsExample {
       println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" + args(0));
       println(FileUtil.readString(new File(SparkFiles.getRootDirectory() + "/spark-defaults.conf"), Charset.defaultCharset()))
     }
-
+    println("##################### getClass.getClassLoader BEGIN #########")
     // 打印实际生效的 classpath
     val classLoader = getClass.getClassLoader
     val urls = classLoader.asInstanceOf[java.net.URLClassLoader].getURLs
     urls.foreach(url => {
       println(url)
     })
+    println("##################### getClass.getClassLoader END #########")
 
     println("##################### class print driver #########" + StrUtil.isBlankIfStr(""))
 
-
+    println("##################### getConf.getAll BEGIN #########")
     val allConfigs = spark.sparkContext.getConf.getAll
     allConfigs.foreach(println)
+    println("##################### getConf.getAll END #########")
+
+    println("##################### listJars BEGIN #########")
+    spark.sparkContext.listJars().foreach(println)
+    println("##################### listJars END #########")
 
 
     /**
