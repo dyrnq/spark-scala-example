@@ -60,9 +60,15 @@ object TestJarsExample {
     val data = spark.sparkContext.makeRDD((1 to 3000000), 100)
     println(s"Number of partitions:", data.getNumPartitions)
 
+    val arr3 = Array.fill(5)(0)  // [0,0,0,0,0]
+    val arr4 = Array.tabulate(5)(i => i * 2)  // [0,2,4,6,8]
+    val gson = new GsonBuilder().setPrettyPrinting().create()
+    println(gson.toJson(arr4))
 
     val result = data.map(x => {
       println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ map " + StrUtil.isBlankIfStr(""))
+      val gson = new GsonBuilder().setPrettyPrinting().create()
+      println(gson.toJson(x * x))
       x * x
     }).reduce(
 
@@ -89,10 +95,6 @@ object TestJarsExample {
       }
 
     )
-    val arr3 = Array.fill(5)(0)  // [0,0,0,0,0]
-    val arr4 = Array.tabulate(5)(i => i * 2)  // [0,2,4,6,8]
-    val gson = new GsonBuilder().setPrettyPrinting().create()
-    println(gson.toJson(arr4))
 
     spark.stop()
 
