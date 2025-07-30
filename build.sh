@@ -154,9 +154,9 @@ dynamic_conf=""
 if [ "${shuffle_celeborn}" = "true" ]; then
 
 dynamic_conf=$(cat <<EOF | tr '\n' ' ' | sed 's/,$//'
---conf "spark.shuffle.manager=org.apache.spark.shuffle.celeborn.SparkShuffleManager"
---conf "spark.shuffle.service.enabled=false"
---conf "spark.celeborn.master.endpoints=${celeborn_master}"
+--conf spark.shuffle.manager=org.apache.spark.shuffle.celeborn.SparkShuffleManager
+--conf spark.shuffle.service.enabled=false
+--conf spark.celeborn.master.endpoints=${celeborn_master}
 EOF
 )
 
@@ -177,29 +177,29 @@ java_opts=$(cat <<EOF | grep -v '^\s*#' | tr '\n' ' ' | sed 's/,$//'
 -Djava.net.preferIPv6Addresses=false
 -XX:+IgnoreUnrecognizedVMOptions
 -Djdk.reflect.useDirectMethodHandle=false
---add-opens java.base/java.lang=ALL-UNNAMED
---add-opens java.base/java.lang.invoke=ALL-UNNAMED
---add-opens java.base/java.lang.reflect=ALL-UNNAMED
---add-opens java.base/java.io=ALL-UNNAMED
---add-opens java.base/java.net=ALL-UNNAMED
---add-opens java.base/java.nio=ALL-UNNAMED
---add-opens java.base/java.util=ALL-UNNAMED
---add-opens java.base/java.util.concurrent=ALL-UNNAMED
---add-opens java.base/java.util.concurrent.atomic=ALL-UNNAMED
---add-opens java.base/jdk.internal.ref=ALL-UNNAMED
---add-opens java.base/sun.nio.ch=ALL-UNNAMED
---add-opens java.base/sun.nio.cs=ALL-UNNAMED
---add-opens java.base/sun.security.action=ALL-UNNAMED
---add-opens java.base/sun.util.calendar=ALL-UNNAMED
---add-opens java.security.jgss/sun.security.krb5=ALL-UNNAMED
---add-opens java.base/java.text=ALL-UNNAMED
---add-opens java.base/java.time=ALL-UNNAMED
---add-opens java.base/java.util.concurrent.locks=ALL-UNNAMED
---add-opens java.base/java.math=ALL-UNNAMED
---add-opens java.base/java.security=ALL-UNNAMED
---add-opens java.base/jdk.internal.access=ALL-UNNAMED
---add-opens java.base/jdk.internal.misc=ALL-UNNAMED
---add-opens java.base/sun.net.util=ALL-UNNAMED
+--add-opens=java.base/java.lang=ALL-UNNAMED
+--add-opens=java.base/java.lang.invoke=ALL-UNNAMED
+--add-opens=java.base/java.lang.reflect=ALL-UNNAMED
+--add-opens=java.base/java.io=ALL-UNNAMED
+--add-opens=java.base/java.net=ALL-UNNAMED
+--add-opens=java.base/java.nio=ALL-UNNAMED
+--add-opens=java.base/java.util=ALL-UNNAMED
+--add-opens=java.base/java.util.concurrent=ALL-UNNAMED
+--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED
+--add-opens=java.base/jdk.internal.ref=ALL-UNNAMED
+--add-opens=java.base/sun.nio.ch=ALL-UNNAMED
+--add-opens=java.base/sun.nio.cs=ALL-UNNAMED
+--add-opens=java.base/sun.security.action=ALL-UNNAMED
+--add-opens=java.base/sun.util.calendar=ALL-UNNAMED
+--add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED
+--add-opens=java.base/java.text=ALL-UNNAMED
+--add-opens=java.base/java.time=ALL-UNNAMED
+--add-opens=java.base/java.util.concurrent.locks=ALL-UNNAMED
+--add-opens=java.base/java.math=ALL-UNNAMED
+--add-opens=java.base/java.security=ALL-UNNAMED
+--add-opens=java.base/jdk.internal.access=ALL-UNNAMED
+--add-opens=java.base/jdk.internal.misc=ALL-UNNAMED
+--add-opens=java.base/sun.net.util=ALL-UNNAMED
 EOF
 )
 
@@ -225,16 +225,17 @@ ${spark_home}/bin/spark-submit \
 --class "${class}" \
 --deploy-mode "${deploy_mode}" \
 --master "${spark_master}" \
---conf "spark.jars.ivy=${spark_home}/.ivy" \
---conf "spark.jars.ivySettings=${spark_home}/conf/ivysettings.xml" \
---conf "spark.driver.extraJavaOptions=${java_opts}" \
---conf "spark.executor.extraJavaOptions=${java_opts}" \
---conf "spark.cores.max=4" \
---conf "spark.driver.extraClassPath=${MAVEN_PATH_PACKAGES}" \
---conf "spark.executor.extraClassPath=${MAVEN_PATH_PACKAGES}" \
+--conf spark.jars.ivy=${spark_home}/.ivy \
+--conf spark.jars.ivySettings=${spark_home}/conf/ivysettings.xml \
+--conf spark.driver.extraJavaOptions=${java_opts} \
+--conf spark.executor.extraJavaOptions=${java_opts} \
+--conf spark.driver.extraClassPath=${MAVEN_PATH_PACKAGES} \
+--conf spark.executor.extraClassPath=${MAVEN_PATH_PACKAGES} \
 ${dynamic_conf} \
 http://192.168.6.171:3000/target/spark-scala-example-1.0-SNAPSHOT-shaded.jar
 
+#--conf "spark.driver.extraClassPath=${MAVEN_PATH_PACKAGES}" \
+#--conf "spark.executor.extraClassPath=${MAVEN_PATH_PACKAGES}" \
 #--conf "spark.jars.packages=${PACKAGES}" \
 #--conf "spark.driver.extraClassPath=${LOCAL_PACKAGES}" \
 #--conf "spark.executor.extraClassPath=${LOCAL_PACKAGES}" \
