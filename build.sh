@@ -91,8 +91,8 @@ org.apache.spark:spark-streaming-kafka-0-10_2.12:3.5.4
 org.apache.spark:spark-token-provider-kafka-0-10_2.12:3.5.4
 org.apache.kafka:kafka-clients:3.8.1
 org.apache.commons:commons-pool2:2.12.1
-org.apache.hudi:hudi-spark3.5-bundle_2.12:1.0.1
-org.apache.hudi:hudi-utilities-bundle_2.12:1.0.1
+org.apache.hudi:hudi-spark3.5-bundle_2.12:1.0.2
+org.apache.hudi:hudi-utilities-bundle_2.12:1.0.2
 cn.hutool:hutool-all:5.8.39
 org.apache.celeborn:celeborn-client-spark-3-shaded_2.12:0.6.0
 com.google.code.gson:gson:2.13.1
@@ -215,12 +215,16 @@ java_opts=$(cat <<EOF | grep -v '^\s*#' | tr '\n' ' ' | sed 's/,$//'
 EOF
 )
 MAVEN_PATH_PACKAGES_JARS=${MAVEN_PATH_PACKAGES//:/,}
+MAVEN_HTTP_PACKAGES_JARS=${MAVEN_PATH_PACKAGES//:/,}
+MAVEN_HTTP_PACKAGES_JARS=${MAVEN_HTTP_PACKAGES_JARS//${local_maven_repo}/https:\/\/maven.aliyun.com\/repository\/public}
 
 echo "${dynamic_conf}"
 echo "${java_opts}"
 echo "${MAVEN_PATH_PACKAGES}"
 echo "${LOCAL_PACKAGES}"
 echo "${MAVEN_PATH_PACKAGES_JARS}"
+echo "${MAVEN_HTTP_PACKAGES_JARS}"
+
 #--conf "spark.jars.ivySettings=${spark_home}/conf/ivysettings.xml" \
 
 set -x;
@@ -234,7 +238,7 @@ docker run \
 -v "${local_maven_repo}":"${local_maven_repo}" \
 "${spark_image}" \
 ${spark_home}/bin/spark-submit \
---packages "${PACKAGES}" \
+--jars "${MAVEN_HTTP_PACKAGES_JARS}" \
 --files "${spark_home}/conf/spark-defaults.conf" \
 --class "${class}" \
 --deploy-mode "${deploy_mode}" \
@@ -243,8 +247,7 @@ ${spark_home}/bin/spark-submit \
 --conf spark.jars.ivySettings=${spark_home}/conf/ivysettings.xml \
 --conf spark.driver.extraJavaOptions="${java_opts}" \
 --conf spark.executor.extraJavaOptions="${java_opts}" \
---conf spark.driver.extraClassPath="${IVY_PACKAGES}" \
---conf spark.executor.extraClassPath="${IVY_PACKAGES}" \
+--conf spark.shuffle.useOldFetchProtocol=true \
 ${dynamic_conf} \
 http://192.168.6.171:3000/target/spark-scala-example-1.0-SNAPSHOT-shaded.jar
 

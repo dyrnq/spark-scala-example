@@ -14,7 +14,7 @@
         <scala.binary.version>2.12</scala.binary.version>
         <spark.version>3.5.4</spark.version>
         <delta.version>3.3.0</delta.version>
-        <hudi.version>1.0.1</hudi.version>
+        <hudi.version>1.0.2</hudi.version>
         <hadoop.version>3.3.4</hadoop.version>
         <iceberg.version>1.8.1</iceberg.version>
     </properties>
