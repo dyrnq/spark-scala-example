@@ -2,16 +2,18 @@ package sample
 
 import cn.hutool.core.io.FileUtil
 import cn.hutool.core.util.StrUtil
-import com.google.gson.{Gson, GsonBuilder}
+import com.google.gson.GsonBuilder
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkFiles, TaskContext}
 
 import java.io.File
+import java.net.InetAddress
 import java.nio.charset.Charset
 
 object TestJarsExample {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder.appName("TestJarsExample").getOrCreate()
+    println(args.length)
 
     println("**************************** driver getRootDirectory=" + SparkFiles.getRootDirectory())
 
@@ -60,8 +62,8 @@ object TestJarsExample {
     val data = spark.sparkContext.makeRDD((1 to 3000000), 100)
     println(s"Number of partitions:", data.getNumPartitions)
 
-    val arr3 = Array.fill(5)(0)  // [0,0,0,0,0]
-    val arr4 = Array.tabulate(5)(i => i * 2)  // [0,2,4,6,8]
+    val arr3 = Array.fill(5)(0) // [0,0,0,0,0]
+    val arr4 = Array.tabulate(5)(i => i * 2) // [0,2,4,6,8]
     val gson = new GsonBuilder().setPrettyPrinting().create()
     println(gson.toJson(arr4))
 
@@ -75,26 +77,56 @@ object TestJarsExample {
       (x, y) => {
 
         if (TaskContext.get != null) {
+          val stageInfo = TaskContext.get().stageId()
           val partitionId = TaskContext.get.partitionId
-          println("$$$$$$$$$$$$$$$$$$$$$ partitionId=" + partitionId);
+          println(s"Reduce task in Stage $stageInfo, Partition $partitionId")
         }
         println("##################### class print reduce #########" + StrUtil.isBlankIfStr(""))
         println("**************************** reduce getRootDirectory=" + SparkFiles.getRootDirectory())
         val file = new File(SparkFiles.getRootDirectory())
-        println("**************************** reduce" + file.getAbsolutePath)
+        println("**************************** reduce " + file.getAbsolutePath)
         file.listFiles().foreach { f =>
-          println(f.getName)
+          if (f.isDirectory) {
+            f.listFiles().foreach { ff => {
+              println(ff.getName)
+            }
+            }
+          }else{
+            println(f.getName)
+          }
+
         }
 
         if (args.length > 0) {
           println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" + args(0));
-          println(FileUtil.readString(new File(SparkFiles.getRootDirectory() + "/spark-defaults.conf"), Charset.defaultCharset()))
+          println(FileUtil.readString(new File(SparkFiles.get("spark-defaults.conf")), Charset.defaultCharset()))
         }
 
         x + y
       }
 
     )
+    //错误写法
+    //println(FileUtil.readString(new File("spark-defaults.conf"), Charset.defaultCharset()))
+    //println(FileUtil.readString(new File("./spark-defaults.conf"), Charset.defaultCharset()))
+
+//    Exception in thread "main" java.lang.reflect.InvocationTargetException
+//    at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+//    at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(Unknown Source)
+//    at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)
+//    at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+//    at org.apache.spark.deploy.worker.DriverWrapper$.main(DriverWrapper.scala:63)
+//    at org.apache.spark.deploy.worker.DriverWrapper.main(DriverWrapper.scala)
+//    Caused by: cn.hutool.core.io.IORuntimeException: File not exist: spark-defaults.conf
+//    at cn.hutool.core.io.file.FileReader.checkFile(FileReader.java:300)
+//    at cn.hutool.core.io.file.FileReader.<init>(FileReader.java:57)
+//    at cn.hutool.core.io.file.FileReader.create(FileReader.java:37)
+//    at cn.hutool.core.io.FileUtil.readString(FileUtil.java:2173)
+//    at sample.TestJarsExample$.main(TestJarsExample.scala:107)
+//    at sample.TestJars
+
+    //正确写法
+    println(FileUtil.readString(new File(SparkFiles.get("spark-defaults.conf")), Charset.defaultCharset()))
 
     spark.stop()
 
