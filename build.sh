@@ -214,11 +214,13 @@ java_opts=$(cat <<EOF | grep -v '^\s*#' | tr '\n' ' ' | sed 's/,$//'
 --add-opens=java.base/sun.net.util=ALL-UNNAMED
 EOF
 )
+MAVEN_PATH_PACKAGES_JARS=${MAVEN_PATH_PACKAGES//:/,}
 
 echo "${dynamic_conf}"
 echo "${java_opts}"
 echo "${MAVEN_PATH_PACKAGES}"
 echo "${LOCAL_PACKAGES}"
+echo "${MAVEN_PATH_PACKAGES_JARS}"
 #--conf "spark.jars.ivySettings=${spark_home}/conf/ivysettings.xml" \
 
 set -x;
@@ -252,7 +254,7 @@ http://192.168.6.171:3000/target/spark-scala-example-1.0-SNAPSHOT-shaded.jar
 #--conf "spark.driver.extraClassPath=${LOCAL_PACKAGES}" \
 #--conf "spark.executor.extraClassPath=${LOCAL_PACKAGES}" \
 
-# --jars "${MAVEN_PATH_PACKAGES}" \
+# --jars "${MAVEN_PATH_PACKAGES_JARS}" \
 # --packages "${PACKAGES}" \
 #--conf "spark.driver.extraJavaOptions=${extraJavaOptions}" \
 #--conf "spark.executor.extraJavaOptions=${extraJavaOptions}" \
