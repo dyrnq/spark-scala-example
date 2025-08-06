@@ -96,6 +96,7 @@ org.apache.hudi:hudi-utilities-bundle_2.12:1.0.2
 cn.hutool:hutool-all:5.8.39
 org.apache.celeborn:celeborn-client-spark-3-shaded_2.12:0.6.0
 com.google.code.gson:gson:2.13.1
+org.apache.gravitino:gravitino-spark-connector-runtime-3.5_2.12:0.9.1
 EOF
 )
 
@@ -216,8 +217,9 @@ EOF
 )
 MAVEN_PATH_PACKAGES_JARS=${MAVEN_PATH_PACKAGES//:/,}
 MAVEN_HTTP_PACKAGES_JARS=${MAVEN_PATH_PACKAGES//:/,}
-MAVEN_HTTP_PACKAGES_JARS=${MAVEN_HTTP_PACKAGES_JARS//${local_maven_repo}/https:\/\/maven.aliyun.com\/repository\/public}
-
+#MAVEN_HTTP_PACKAGES_JARS=${MAVEN_HTTP_PACKAGES_JARS//${local_maven_repo}/https:\/\/maven.aliyun.com\/repository\/public}
+MAVEN_HTTP_PACKAGES_JARS=${MAVEN_HTTP_PACKAGES_JARS//${local_maven_repo}/https://repo.huaweicloud.com/repository/maven}
+# https://repo.huaweicloud.com/repository/maven/org/apache/gravitino/gravitino-spark-connector-runtime-3.5_2.12/0.9.1/gravitino-spark-connector-runtime-3.5_2.12-0.9.1.jar
 echo "${dynamic_conf}"
 echo "${java_opts}"
 echo "${MAVEN_PATH_PACKAGES}"
