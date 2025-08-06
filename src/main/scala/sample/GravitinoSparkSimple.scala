@@ -11,6 +11,7 @@ object GravitinoSparkSimple {
       .config("spark.plugins", "org.apache.gravitino.spark.connector.plugin.GravitinoSparkPlugin")
       .config("spark.sql.gravitino.uri","http://192.168.6.159:8090")
       .config("spark.sql.gravitino.metalake","mylake")
+      .config("spark.sql.gravitino.enableIcebergSupport","true")
       .getOrCreate()
 
 
