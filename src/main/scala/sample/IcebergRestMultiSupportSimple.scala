@@ -7,7 +7,7 @@ object IcebergRestMultiSupportSimple {
     // 创建 SparkSession
 
     val spark = SparkSession.builder()
-      .appName("Iceberg S3 Example")
+      .appName("IcebergRestMultiSupportSimple")
       .config("spark.sql.extensions", "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions")
       .config("spark.sql.catalog.foo_rest_catalog", "org.apache.iceberg.spark.SparkCatalog")
       .config("spark.sql.catalog.foo_rest_catalog.catalog-impl", "org.apache.iceberg.rest.RESTCatalog")
