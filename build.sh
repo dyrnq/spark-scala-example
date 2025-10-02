@@ -96,7 +96,7 @@ org.apache.hudi:hudi-utilities-bundle_2.12:1.0.2
 cn.hutool:hutool-all:5.8.39
 org.apache.celeborn:celeborn-client-spark-3-shaded_2.12:0.6.0
 com.google.code.gson:gson:2.13.1
-org.apache.gravitino:gravitino-spark-connector-runtime-3.5_2.12:0.9.1
+org.apache.gravitino:gravitino-spark-connector-runtime-3.5_2.12:1.0.0
 EOF
 )
 
@@ -237,6 +237,7 @@ docker run \
 -v ./target:/target \
 -v ./conf/spark-defaults.conf:${spark_home}/conf/spark-defaults.conf \
 -v ./conf/ivysettings.xml:${spark_home}/conf/ivysettings.xml \
+-v ./conf/log4j2.properties:${spark_home}/conf/log4j2.properties \
 -v "${local_maven_repo}":"${local_maven_repo}" \
 "${spark_image}" \
 ${spark_home}/bin/spark-submit \

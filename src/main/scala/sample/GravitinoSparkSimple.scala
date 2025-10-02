@@ -11,7 +11,20 @@ object GravitinoSparkSimple {
       .config("spark.plugins", "org.apache.gravitino.spark.connector.plugin.GravitinoSparkPlugin")
       .config("spark.sql.gravitino.uri","http://192.168.6.159:8090")
       .config("spark.sql.gravitino.metalake","mylake")
-      .config("spark.sql.gravitino.enableIcebergSupport","true")
+//      .config("spark.sql.gravitino.enableIcebergSupport","true")
+//      .config("spark.sql.catalog.foo_rest_catalog.prefix", "foo")
+//      .config("spark.sql.catalog.foo_rest_catalog.s3.endpoint", "http://192.168.6.159:9000")
+//      .config("spark.sql.catalog.foo_rest_catalog.s3.path-style-access", "true")
+//      .config("spark.sql.catalog.foo_rest_catalog.client.region", "us-east-1")
+//      .config("spark.sql.catalog.foo_rest_catalog.s3.access-key-id", "vUR3oLMF5ds8gWCP")
+//      .config("spark.sql.catalog.foo_rest_catalog.s3.secret-access-key", "odWFIZukYrw9dY0G5ezDKMZWbhU0S4oD")
+//
+//      .config("spark.sql.catalog.bar_rest_catalog.prefix", "bar")
+//      .config("spark.sql.catalog.bar_rest_catalog.s3.endpoint", "http://192.168.6.159:9200")
+//      .config("spark.sql.catalog.bar_rest_catalog.s3.path-style-access", "true")
+//      .config("spark.sql.catalog.bar_rest_catalog.client.region", "us-east-1")
+//      .config("spark.sql.catalog.bar_rest_catalog.s3.access-key-id", "vUR3oLMF5ds8gWCP")
+//      .config("spark.sql.catalog.bar_rest_catalog.s3.secret-access-key", "odWFIZukYrw9dY0G5ezDKMZWbhU0S4oD")
       .getOrCreate()
 
 
