@@ -79,6 +79,7 @@ object OrdersAnalysisKafka {
       .foreachBatch { (df: DataFrame, epochId: Long) =>
         df.show(false)
       }
+      .queryName("orders-analysis")
       .option("checkpointLocation", checkpointLocation)
       .outputMode("update")
       .start()
