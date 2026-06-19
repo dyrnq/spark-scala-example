@@ -9,8 +9,8 @@ spark_master="spark://192.168.6.155:7077,192.168.6.156:7077,192.168.6.157:7077"
 #spark_image="apache/spark:3.5.4-scala2.12-java17-python3-ubuntu"
 #spark_image="bitnami/spark:3.5.4-debian-12-r6"
 
-#spark_image="apache/spark:3.5.6-scala2.12-java17-python3-ubuntu"
-spark_image="bitnami/spark:3.5.6-debian-12-r1"
+spark_image="apache/spark:3.5.8-scala2.12-java17-python3-ubuntu"
+#spark_image="bitnami/spark:3.5.6-debian-12-r1"
 spark_home=""
 
 shuffle_celeborn="false"
@@ -77,10 +77,10 @@ echo "local_maven_repo=${local_maven_repo}"
 #mvn dependency:get -Dartifact=org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.4
 #mvn dependency:get -Dartifact=org.apache.spark:spark-streaming-kafka-0-10_2.12:3.5.4
 #mvn dependency:get -Dartifact=org.apache.spark:spark-token-provider-kafka-0-10_2.12:3.5.4
-#mvn dependency:get -Dartifact=org.apache.commons:commons-pool2:2.12.1
-#mvn dependency:get -Dartifact=org.apache.hudi:hudi-utilities-bundle_2.12:1.0.1
+#mvn dependency:get -Dartifact=org.apache.commons:commons-pool2:2.13.1
+#mvn dependency:get -Dartifact=org.apache.hudi:hudi-utilities-bundle_2.12:1.2.0
 #mvn dependency:get -Dartifact=org.apache.spark:spark-connect_2.12:3.5.4
-#mvn dependency:get -Dartifact=org.apache.celeborn:celeborn-client-spark-3-shaded_2.12:0.6.0
+#mvn dependency:get -Dartifact=org.apache.celeborn:celeborn-client-spark-3-shaded_2.12:0.6.3
 # https://stackoverflow.com/questions/39906536/spark-history-server-on-s3a-filesystem-classnotfoundexception/65086818#65086818
 
 PACKAGES=$(cat <<EOF | tr '\n' ',' | sed 's/,$//'
@@ -90,13 +90,13 @@ org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.4
 org.apache.spark:spark-streaming-kafka-0-10_2.12:3.5.4
 org.apache.spark:spark-token-provider-kafka-0-10_2.12:3.5.4
 org.apache.kafka:kafka-clients:3.8.1
-org.apache.commons:commons-pool2:2.12.1
-org.apache.hudi:hudi-spark3.5-bundle_2.12:1.0.2
-org.apache.hudi:hudi-utilities-bundle_2.12:1.0.2
+org.apache.commons:commons-pool2:2.13.1
+org.apache.hudi:hudi-spark3.5-bundle_2.12:1.2.0
+org.apache.hudi:hudi-utilities-bundle_2.12:1.2.0
 cn.hutool:hutool-all:5.8.39
-org.apache.celeborn:celeborn-client-spark-3-shaded_2.12:0.6.0
-com.google.code.gson:gson:2.13.1
-org.apache.gravitino:gravitino-spark-connector-runtime-3.5_2.12:1.0.0
+org.apache.celeborn:celeborn-client-spark-3-shaded_2.12:0.6.3
+com.google.code.gson:gson:2.14.0
+org.apache.gravitino:gravitino-spark-connector-runtime-3.5_2.12:1.2.1
 EOF
 )
 
@@ -219,7 +219,7 @@ MAVEN_PATH_PACKAGES_JARS=${MAVEN_PATH_PACKAGES//:/,}
 MAVEN_HTTP_PACKAGES_JARS=${MAVEN_PATH_PACKAGES//:/,}
 #MAVEN_HTTP_PACKAGES_JARS=${MAVEN_HTTP_PACKAGES_JARS//${local_maven_repo}/https:\/\/maven.aliyun.com\/repository\/public}
 MAVEN_HTTP_PACKAGES_JARS=${MAVEN_HTTP_PACKAGES_JARS//${local_maven_repo}/https://repo.huaweicloud.com/repository/maven}
-# https://repo.huaweicloud.com/repository/maven/org/apache/gravitino/gravitino-spark-connector-runtime-3.5_2.12/0.9.1/gravitino-spark-connector-runtime-3.5_2.12-0.9.1.jar
+# https://repo.huaweicloud.com/repository/maven/org/apache/gravitino/gravitino-spark-connector-runtime-3.5_2.12/1.2.1/gravitino-spark-connector-runtime-3.5_2.12-1.2.1.jar
 echo "${dynamic_conf}"
 echo "${java_opts}"
 echo "${MAVEN_PATH_PACKAGES}"
